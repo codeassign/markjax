@@ -1,0 +1,27 @@
+{
+  "name": "markjax",
+  "description": "Javascript parser for converting Markdown with LaTeX to HTML",
+  "main": "./lib/markjax.js",
+  "authors": [
+    "CodeAssign Team <hello@codeassign.com> (http://codeassign.com)"
+  ],
+  "license": "Apache-2.0",
+  "keywords": [
+    "parser",
+    "markdown",
+    "latex",
+    "html"
+  ],
+  "homepage": "https://github.com/codeassign/markjax",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "MathJax": "^2.6.1",
+    "marked": "^0.3.6"
+  }
+}
