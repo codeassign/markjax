@@ -1,6 +1,6 @@
 {
   "name": "markjax",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Javascript parser for converting Markdown with LaTeX to HTML",
   "main": "./lib/markjax.js",
   "scripts": {
