@@ -1,6 +1,3 @@
-require("marked");
-require("mathjax");
-
 ;(function() {
   MathJax.Hub.Config({
     showProcessingMessages: false,
@@ -18,17 +15,8 @@ require("mathjax");
   });
 
   marked.setOptions({
-    renderer: new marked.Renderer(),
-    gfm: true,
-    tables: true,
-    breaks: false,
-    pedantic: false,
-    sanitize: false,
-    smartLists: true,
-    smartypants: false,
-    highlight: function (code) {
-      return hljs.highlightAuto(code).value;
-    }
+    breaks: true,
+    sanitize: true
   });
 
   function EscapeTex(text) {
@@ -59,27 +47,27 @@ require("mathjax");
     return out;
   }
 
-  function PreviewDone() {
-    this.isRunning[index] = false;
-    Preview.forceUpdate = false;
-    this.preview[index].innerHTML = this.buffer[index].innerHTML;
-  }
-
   function markjax(text, callback){
-      var src = text.replace(/&lt;/mg, '<').replace(/&gt;/mg, '>');
+    var node = document.createElement('div');
+    var src = text.replace(/&lt;/mg, '<').replace(/&gt;/mg, '>');
 
-      var html = this.ReEscapeTex(marked(this.EscapeTex(src)));
-      var code = $(html).find("code");
-      for (var i = 0; i < code.length; i++) {
-        code[i].innerHTML = code[i].innerHTML.replace(/\\\$/g, '$');
+    var html = ReEscapeTex(marked(EscapeTex(src)));
+    node.innerHTML = html;
+    var code = node.getElementsByTagName("code");
+
+    for (var i = 0; i < code.length; i++) {
+      code[i].innerHTML = code[i].innerHTML.replace(/\\\$/g, '$');
+    }
+
+    var elements = node.getElementsByTagName("*");
+    for (var i = 0; i < elements.length; i++) {
+      if (elements[i].tagName !== "CODE") {
+        elements[i].classList.add("mathjax");
       }
-      $(html).find("*").not("code").addClass("mathjax");
-
-      MathJax.Hub.Queue(
-        ["Typeset", MathJax.Hub, html],
-        [callback, html],
-        ["resetEquationNumbers", MathJax.InputJax.TeX]
-      );
+    }
+    
+    callback(node.innerHTML);
+    MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
   }  
 
   if (typeof module !== 'undefined' && typeof exports === 'object') {

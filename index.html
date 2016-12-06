@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MarkJax</title>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.6/marked.min.js'></script>
+    <script type="text/javascript" src='js/markjax.js'></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.min.css">
+
+    <style>
+      body {
+        padding: 80px;
+      }
+      #input {
+        min-height: 200px;
+      }
+    </style>
+  </head>
+  
+  <body>
+    <a href="https://github.com/codeassign/markjax"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <div class="row">
+      <textarea class="col-xs-12 col-sm-6 col-md-6 col-lg-6" id="input" onkeyup="render()">
+# MarkJax
+
+Markdown + $\LaTeX$ parser made by [CodeAssign](https://codeassign.com).
+
+It converts Markdown + $\LaTeX$ text, such as this one, and produces HTML.
+
+It uses [marked](https://github.com/chjj/marked) as Markdown parser and [MathJax](https://www.mathjax.org/) as $\LaTeX$ parser - hence the name **MarkJax**.
+
+It is available on [GitHub](https://github.com/codeassign/markjax).
+</textarea>
+      <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6" id="output"></div>
+    </div>
+
+    <script type="text/javascript">
+      function render() {
+        var textarea = document.getElementById("input");
+        var preview = document.getElementById("output");
+        markjax(textarea.value, function(resultHTML) {
+          preview.innerHTML = resultHTML;
+        });
+      }
+
+      render()
+    </script>
+  </body>
+</html>
