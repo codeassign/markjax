@@ -40,7 +40,7 @@ It is available on [GitHub](https://github.com/codeassign/markjax).
       function render() {
         var textarea = document.getElementById("input");
         var preview = document.getElementById("output");
-        preview.innerHTML = markjax(textarea.value);
+        markjax(textarea.value, preview);
       }
 
       render()

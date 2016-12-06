@@ -1,6 +1,8 @@
 ;(function() {
   MathJax.Hub.Config({
     showProcessingMessages: false,
+    messageStyle: "none",
+    skipStartupTypeset: true,
     tex2jax: {
       inlineMath: [['$','$']],
       displayMath: [['$$', '$$']],
@@ -47,7 +49,7 @@
     return out;
   }
 
-  function markjax(text){
+  function markjax(text, element) {
     var node = document.createElement('div');
     var src = text.replace(/&lt;/mg, '<').replace(/&gt;/mg, '>');
 
@@ -66,8 +68,8 @@
       }
     }
     
-    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-    return node.innerHTML;    
+    element.innerHTML = node.innerHTML;
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, element]);
   } 
 
   if (typeof module !== 'undefined' && typeof exports === 'object') {
