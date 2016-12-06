@@ -47,7 +47,7 @@
     return out;
   }
 
-  function markjax(text, callback){
+  function markjax(text){
     var node = document.createElement('div');
     var src = text.replace(/&lt;/mg, '<').replace(/&gt;/mg, '>');
 
@@ -66,9 +66,9 @@
       }
     }
     
-    callback(node.innerHTML);
-    MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
-  }  
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    return node.innerHTML;    
+  } 
 
   if (typeof module !== 'undefined' && typeof exports === 'object') {
     module.exports = markjax;
