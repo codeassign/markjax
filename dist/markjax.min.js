@@ -1,5 +1,5 @@
 /**
- * markjax v1.0.0
+ * markjax v1.0.2
  * Copyright CodeAssign
  * @link http://markjax.codeassign.com/
  * @license Apache 2.0
