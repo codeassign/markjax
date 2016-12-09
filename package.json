@@ -1,6 +1,6 @@
 {
   "name": "markjax",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Javascript parser for converting Markdown with LaTeX to HTML",
   "keywords": [
     "parser",
@@ -11,7 +11,7 @@
   ],
   "homepage": "http://markjax.codeassign.com/",
   "main": "./js/markjax.js",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "company": "CodeAssign",
   "author": {
     "name": "Herman Zvonimir Došilović",
