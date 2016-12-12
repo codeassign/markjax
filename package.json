@@ -21,7 +21,8 @@
     "url": "https://github.com/codeassign/markjax/issues"
   },
   "dependencies": {
-    "marked": "*"
+    "marked": "*",
+    "katex": "*"
   },
   "devDependencies": {
     "browserify": "*",

@@ -1,29 +1,12 @@
-var head = document.getElementsByTagName("head")[0], script;
-script = document.createElement("script");
-script.type = "text/x-mathjax-config";
-script[(window.opera ? "innerHTML" : "text")] =
-  "MathJax.Hub.Config({" +
-  "  showProcessingMessages: false," +
-  "  messageStyle: \"none\"," +
-  "  tex2jax: {" +
-  "    inlineMath: [['$','$']]," +
-  "    displayMath: [['$$', '$$']]," +
-  "    ignoreClass: \".*\"," +
-  "    processClass: \"mathjax\"" +
-  "  }," +
-  "  TeX: {" +
-  "    equationNumbers: {" +
-  "      autoNumber: \"AMS\"" +
-  "    }" +
-  "  }" +
-  "});";
-head.appendChild(script);
-script = document.createElement("script");
-script.type = "text/javascript";
-script.src  = "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-head.appendChild(script);
+(function () {
+    var link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css";
+    document.getElementsByTagName("head")[0].appendChild(link);
+})();
 
 var marked = require("marked");
+var katex = require("katex");
 
 marked.setOptions({
   breaks: true,
@@ -58,10 +41,186 @@ function ReEscapeTex(text) {
   return out;
 }
 
-function markjax(text, element) {
+function findEndOfMath(delimiter, text, startIndex) {
+  var index = startIndex;
+  var braceLevel = 0;
+
+  var delimLength = delimiter.length;
+
+  while (index < text.length) {
+    var character = text[index];
+    if (braceLevel <= 0 &&
+      text.slice(index, index + delimLength) === delimiter) {
+        return index;
+      } else if (character === "\\") {
+        index++;
+      } else if (character === "{") {
+        braceLevel++;
+      } else if (character === "}") {
+        braceLevel--;
+      }
+
+    index++;
+  }
+
+  return -1;
+}
+
+function splitAtDelimiters(startData, leftDelim, rightDelim, display) {
+  var finalData = [];
+
+  for (var i = 0; i < startData.length; i++) {
+    if (startData[i].type === "text") {
+      var text = startData[i].data;
+
+      var lookingForLeft = true;
+      var currIndex = 0;
+      var nextIndex;
+
+      nextIndex = text.indexOf(leftDelim);
+      if (nextIndex !== -1) {
+        currIndex = nextIndex;
+        finalData.push({
+          type: "text",
+          data: text.slice(0, currIndex),
+        });
+        lookingForLeft = false;
+      }
+
+      while (true) {
+        if (lookingForLeft) {
+          nextIndex = text.indexOf(leftDelim, currIndex);
+          if (nextIndex === -1) {
+            break;
+          }
+
+          finalData.push({
+            type: "text",
+            data: text.slice(currIndex, nextIndex),
+          });
+
+          currIndex = nextIndex;
+        } else {
+          nextIndex = findEndOfMath(
+            rightDelim,
+            text,
+            currIndex + leftDelim.length);
+          if (nextIndex === -1) {
+            break;
+          }
+
+          finalData.push({
+            type: "math",
+            data: text.slice(
+              currIndex + leftDelim.length,
+              nextIndex),
+            rawData: text.slice(
+              currIndex,
+              nextIndex + rightDelim.length),
+            display: display,
+          });
+
+          currIndex = nextIndex + rightDelim.length;
+        }
+
+        lookingForLeft = !lookingForLeft;
+      }
+
+      finalData.push({
+        type: "text",
+        data: text.slice(currIndex),
+      });
+    } else {
+      finalData.push(startData[i]);
+    }
+  }
+
+  return finalData;
+}
+
+function splitWithDelimiters(text, delimiters) {
+  var data = [{type: "text", data: text}];
+  for (var i = 0; i < delimiters.length; i++) {
+    var delimiter = delimiters[i];
+    data = splitAtDelimiters(
+      data, delimiter.left, delimiter.right,
+      delimiter.display || false);
+  }
+  return data;
+}
+
+function renderMathInText(text, delimiters) {
+  var data = splitWithDelimiters(text, delimiters);
+
+  var fragment = document.createDocumentFragment();
+
+  for (var i = 0; i < data.length; i++) {
+    if (data[i].type === "text") {
+      fragment.appendChild(document.createTextNode(data[i].data));
+    } else {
+      var span = document.createElement("span");
+      var math = data[i].data;
+      try {
+        katex.render(math, span, {
+          displayMode: data[i].display,
+        });
+      } catch (e) {
+        if (!(e instanceof katex.ParseError)) {
+          throw e;
+        }
+        console.error(
+          "KaTeX auto-render: Failed to parse `" + data[i].data +
+            "` with ",
+          e
+        );
+        fragment.appendChild(document.createTextNode(data[i].rawData));
+        continue;
+      }
+      fragment.appendChild(span);
+    }
+  }
+
+  return fragment;
+}
+
+function renderElem(elem, delimiters, ignoredTags) {
+  for (var i = 0; i < elem.childNodes.length; i++) {
+    var childNode = elem.childNodes[i];
+    if (childNode.nodeType === 3) {
+      // Text node
+      var frag = renderMathInText(childNode.textContent, delimiters);
+      i += frag.childNodes.length - 1;
+      elem.replaceChild(frag, childNode);
+    } else if (childNode.nodeType === 1) {
+      // Element node
+      var shouldRender = ignoredTags.indexOf(
+        childNode.nodeName.toLowerCase()) === -1;
+
+      if (shouldRender) {
+        renderElem(childNode, delimiters, ignoredTags);
+      }
+    }
+  }
+}
+
+function renderMathInElement(elem) {
+  var defaultOptions = {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false},
+    ],
+
+    ignoredTags: [
+      "script", "noscript", "style", "textarea", "pre", "code",
+    ],
+  };
+  renderElem(elem, defaultOptions.delimiters, defaultOptions.ignoredTags);
+}
+
+function markjax(text) {
   var node = document.createElement('div');
   var src = text.replace(/&lt;/mg, '<').replace(/&gt;/mg, '>');
-
+  
   var html = ReEscapeTex(marked(EscapeTex(src)));
   node.innerHTML = html;
   var code = node.getElementsByTagName("code");
@@ -71,14 +230,15 @@ function markjax(text, element) {
   }
 
   var elements = node.getElementsByTagName("*");
+
   for (var i = 0; i < elements.length; i++) {
     if (elements[i].tagName !== "CODE") {
       elements[i].classList.add("mathjax");
     }
   }
   
-  element.innerHTML = node.innerHTML;
-  MathJax.Hub.Queue(["Typeset", MathJax.Hub, element]);
-} 
+  renderMathInElement(node);
+  return node.innerHTML;
+}
 
 module.exports = markjax;

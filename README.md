@@ -20,7 +20,7 @@ Now you can write simple HTML which users `markjax`:
     <div id="output"></div>
 
     <script>
-      markjax("# Hello\n$\LaTeX$", document.getElementById("output"));
+      document.getElementById("output").innerHTML = markjax("# Hello\n$\LaTeX$");
     </script>
   </body>
 </html>
