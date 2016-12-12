@@ -1,6 +1,6 @@
 {
   "name": "markjax",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Javascript parser for converting Markdown with LaTeX to HTML",
   "keywords": [
     "parser",
@@ -21,7 +21,8 @@
     "url": "https://github.com/codeassign/markjax/issues"
   },
   "dependencies": {
-    "marked": "*"
+    "marked": "*",
+    "katex": "*"
   },
   "devDependencies": {
     "browserify": "*",

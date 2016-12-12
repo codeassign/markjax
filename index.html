@@ -22,13 +22,17 @@
       <textarea class="col-xs-12 col-sm-6 col-md-6 col-lg-6" id="input" onkeyup="render()">
 # MarkJax
 
-Markdown + $\LaTeX$ parser made by [CodeAssign](https://codeassign.com).
+Markdown + LaTeX parser made by [CodeAssign](https://codeassign.com).
 
-It converts Markdown + $\LaTeX$ text, such as this one, and produces HTML.
+It converts Markdown + LaTeX text, such as this one, and produces HTML.
 
-It uses [marked](https://github.com/chjj/marked) as Markdown parser and [MathJax](https://www.mathjax.org/) as $\LaTeX$ parser - hence the name **MarkJax**.
+It uses [marked](https://github.com/chjj/marked) as Markdown parser and [katex](https://khan.github.io/KaTeX/) as LaTeX parser.
 
 It is available on [GitHub](https://github.com/codeassign/markjax).
+
+Lets write some math:
+
+$$ f(x) = \int_{-\infty}^\infty\hat f(\xi)\,e^{2 \pi i \xi x}\,d\xi $$
 </textarea>
       <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6" id="output"></div>
     </div>
@@ -37,7 +41,7 @@ It is available on [GitHub](https://github.com/codeassign/markjax).
       function render() {
         var textarea = document.getElementById("input");
         var preview = document.getElementById("output");
-        markjax(textarea.value, preview);
+        preview.innerHTML = markjax(textarea.value);
       }
       render();
     </script>
