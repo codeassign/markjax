@@ -1,17 +1,18 @@
 (function () {
-    var link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css";
-    document.getElementsByTagName("head")[0].appendChild(link);
+    var katex = document.createElement("link");
+    katex.rel = "stylesheet";
+    katex.href = "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css";
+    document.getElementsByTagName("head")[0].appendChild(katex);
+
+    var highlight = document.createElement("link");
+    highlight.rel = "stylesheet";
+    highlight.href = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/styles/default.min.css";
+    document.getElementsByTagName("head")[0].appendChild(highlight);
 })();
 
 var marked = require("marked");
 var katex = require("katex");
-
-marked.setOptions({
-  breaks: true,
-  sanitize: true
-});
+var highlight = require("highlight.js")
 
 function EscapeTex(text) {
   var re = /(`+)(\s*)([\s\S]*?[^`])(\s*)(\1)(?!`)/g;
@@ -217,7 +218,21 @@ function renderMathInElement(elem) {
   renderElem(elem, defaultOptions.delimiters, defaultOptions.ignoredTags);
 }
 
-function markjax(text) {
+function markjax(text, markedOptions = {}) {
+  if (markedOptions["breaks"] === undefined) {
+    markedOptions["breaks"] = true;
+  }
+  if (markedOptions["sanitize"] === undefined) {
+    markedOptions["sanitize"] = true;
+  }
+  if (markedOptions["highlight"] === undefined) {
+    markedOptions["highlight"] = function (code) {
+      return highlight.highlightAuto(code).value;
+    }
+  }
+
+  marked.setOptions(markedOptions);
+
   var node = document.createElement('div');
   var src = text.replace(/&lt;/mg, '<').replace(/&gt;/mg, '>');
   
