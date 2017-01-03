@@ -1,18 +1,47 @@
 (function () {
-    var katex = document.createElement("link");
-    katex.rel = "stylesheet";
-    katex.href = "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css";
-    document.getElementsByTagName("head")[0].appendChild(katex);
+  var head = document.getElementsByTagName("head")[0];
 
-    var highlight = document.createElement("link");
-    highlight.rel = "stylesheet";
-    highlight.href = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/styles/default.min.css";
-    document.getElementsByTagName("head")[0].appendChild(highlight);
+  var mathjaxConfig = document.createElement("script");
+  mathjaxConfig.type = "text/x-mathjax-config";
+  mathjaxConfig[(window.opera ? "innerHTML" : "text")] =
+    "MathJax.Hub.Config({" +
+    "  showProcessingMessages: false," +
+    "  messageStyle: \"none\"," +
+    "  skipStartupTypeset: false," +
+    "  tex2jax: {" +
+    "    inlineMath: [['$','$']]," +
+    "    displayMath: [['$$', '$$']]," +
+    "    ignoreClass: \".*\"," +
+    "    processClass: \"mathjax\"" +
+    "  }," +
+    "  TeX: {" +
+    "    equationNumbers: {" +
+    "      autoNumber: \"AMS\"" +
+    "    }" +
+    "  }" +
+    "});";
+  head.appendChild(mathjaxConfig);
+  
+  var mathjax = document.createElement("script");
+  mathjax.type = "text/javascript";
+  mathjax.src = "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+  head.appendChild(mathjax);
+
+  var katex = document.createElement("link");
+  katex.rel = "stylesheet";
+  katex.href = "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css";
+  head.appendChild(katex);
+
+  var highlight = document.createElement("link");
+  highlight.rel = "stylesheet";
+  highlight.href = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/styles/default.min.css";
+  head.appendChild(highlight);
 })();
 
 var marked = require("marked");
 var katex = require("katex");
-var highlight = require("highlight.js")
+var highlight = require("highlight.js");
+var memoMath = {};
 
 function EscapeTex(text) {
   var re = /(`+)(\s*)([\s\S]*?[^`])(\s*)(\1)(?!`)/g;
@@ -150,6 +179,10 @@ function splitWithDelimiters(text, delimiters) {
   return data;
 }
 
+function remember(key, element) {
+  memoMath[key] = element.innerHTML;
+}
+
 function renderMathInText(text, delimiters) {
   var data = splitWithDelimiters(text, delimiters);
 
@@ -169,15 +202,26 @@ function renderMathInText(text, delimiters) {
         if (!(e instanceof katex.ParseError)) {
           throw e;
         }
-        console.error(
-          "KaTeX auto-render: Failed to parse `" + data[i].data +
-            "` with ",
-          e
-        );
-        fragment.appendChild(document.createTextNode(data[i].rawData));
-        continue;
+
+        span.innerHTML = data[i].rawData;
+        span.classList.add("mathjax");
+        
+        var style = data[i].display ? "$$" : "$";
+        var trimmedData = data[i].data.trim();
+        if (trimmedData[trimmedData.length - 1] === '\\') {
+          trimmedData += " ";
+        }
+        var rawData = style + trimmedData + style;
+
+        if (memoMath[rawData] === undefined) {
+          MathJax.Hub.Queue(["Typeset", MathJax.Hub, span]);
+          MathJax.Hub.Queue([remember, rawData, span]);
+        } else {
+          span.innerHTML = memoMath[rawData];
+        }
+      } finally {
+        fragment.appendChild(span);
       }
-      fragment.appendChild(span);
     }
   }
 
@@ -218,7 +262,7 @@ function renderMathInElement(elem) {
   renderElem(elem, defaultOptions.delimiters, defaultOptions.ignoredTags);
 }
 
-function markjax(text, markedOptions = {}) {
+function markjax(text, element, markedOptions = {}) {
   if (markedOptions["breaks"] === undefined) {
     markedOptions["breaks"] = true;
   }
@@ -252,8 +296,8 @@ function markjax(text, markedOptions = {}) {
     }
   }
   
-  renderMathInElement(node);
-  return node.innerHTML;
+  element.innerHTML = node.innerHTML; 
+  renderMathInElement(element);
 }
 
 module.exports = markjax;

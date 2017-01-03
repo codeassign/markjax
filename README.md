@@ -9,7 +9,7 @@ Place the following line in the `<head>` section of your document:
 <script type="text/javascript" src="https://codeassign.github.io/markjax/dist/markjax.min.js"></script>
 ```
 
-Now you can write simple HTML which users `markjax`:
+Now you can write simple HTML which uses `markjax`:
 ```html
 <html>
   <head>
@@ -20,7 +20,7 @@ Now you can write simple HTML which users `markjax`:
     <div id="output"></div>
 
     <script>
-      document.getElementById("output").innerHTML = markjax("# Hello\n$\LaTeX$");
+      markjax("# Hello\n$\LaTeX$", document.getElementById("output"));
     </script>
   </body>
 </html>
