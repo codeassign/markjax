@@ -263,40 +263,41 @@ function renderMathInElement(elem) {
 }
 
 function markjax(text, element, markedOptions = {}) {
-  if (markedOptions["breaks"] === undefined) {
-    markedOptions["breaks"] = true;
-  }
-  if (markedOptions["sanitize"] === undefined) {
-    markedOptions["sanitize"] = true;
-  }
-  if (markedOptions["highlight"] === undefined) {
-    markedOptions["highlight"] = function (code) {
-      return highlight.highlightAuto(code).value;
+  if (text !== null) {
+    if (markedOptions["breaks"] === undefined) {
+      markedOptions["breaks"] = true;
     }
+    if (markedOptions["sanitize"] === undefined) {
+      markedOptions["sanitize"] = true;
+    }
+    if (markedOptions["highlight"] === undefined) {
+      markedOptions["highlight"] = function (code) {
+        return highlight.highlightAuto(code).value;
+      }
+    }
+
+    marked.setOptions(markedOptions);
+
+    var node = document.createElement('div');
+    var src = text.replace(/&lt;/mg, '<').replace(/&gt;/mg, '>');
+    
+    var html = ReEscapeTex(marked(EscapeTex(src)));
+    node.innerHTML = html;
+    var code = node.getElementsByTagName("code");
+
+    for (var i = 0; i < code.length; i++) {
+      code[i].innerHTML = code[i].innerHTML.replace(/\\\$/g, '$');
+    }
+
+    element.innerHTML = node.innerHTML; 
   }
-
-  marked.setOptions(markedOptions);
-
-  var node = document.createElement('div');
-  var src = text.replace(/&lt;/mg, '<').replace(/&gt;/mg, '>');
   
-  var html = ReEscapeTex(marked(EscapeTex(src)));
-  node.innerHTML = html;
-  var code = node.getElementsByTagName("code");
-
-  for (var i = 0; i < code.length; i++) {
-    code[i].innerHTML = code[i].innerHTML.replace(/\\\$/g, '$');
-  }
-
-  var elements = node.getElementsByTagName("*");
-
+  var elements = element.getElementsByTagName("*");
   for (var i = 0; i < elements.length; i++) {
     if (elements[i].tagName !== "CODE") {
       elements[i].classList.add("mathjax");
     }
   }
-  
-  element.innerHTML = node.innerHTML; 
   renderMathInElement(element);
 }
 
