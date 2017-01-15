@@ -1,5 +1,5 @@
 /**
- * markjax v1.1.0
+ * markjax v1.1.1
  * Copyright CodeAssign
  * @link http://markjax.codeassign.com/
  * @license Apache-2.0
@@ -31,7 +31,7 @@
   
   var mathjax = document.createElement("script");
   mathjax.type = "text/javascript";
-  mathjax.src = "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+  mathjax.src = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
   head.appendChild(mathjax);
 
   var katex = document.createElement("link");
