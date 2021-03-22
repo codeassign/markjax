@@ -289,7 +289,10 @@ function markjax(text, element, markedOptions = {}) {
       code[i].innerHTML = code[i].innerHTML.replace(/\\\$/g, '$');
     }
 
-    element.innerHTML = node.innerHTML; 
+    if(element !== undefined && element !== '') {
+        element.innerHTML = node.innerHTML;
+    }
+    return node.innerHTML;
   }
   
   var elements = element.getElementsByTagName("*");
